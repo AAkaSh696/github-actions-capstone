@@ -36,7 +36,7 @@ jobs:
           fi
 
       - name: Stop and remove container
-        if: always()
+        if: always() # run if pass or fail
         run: |
           docker stop health-container || true
           docker rm health-container || true
@@ -52,5 +52,4 @@ jobs:
           else
             echo "- Status: FAILED" >> $GITHUB_STEP_SUMMARY
           fi
-          
           echo "- Time: $(date)" >> $GITHUB_STEP_SUMMARY
