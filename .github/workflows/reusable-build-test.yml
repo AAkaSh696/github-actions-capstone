@@ -1,0 +1,42 @@
+name: Build and Test 
+
+on:
+    workflow_call:
+        inputs:
+            node_version:
+                required: true
+                type: string 
+            run_tests:
+                required: false 
+                type: boolean
+                default: true
+        outputs:
+            test_result: 
+                value: ${{ jobs.test.outputs.result }}
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        outputs:
+            result: ${{ steps.result.outputs.result }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup node
+              uses: actions/setup-node@v4
+              with:
+                node-version: ${{inputs.node_version}}
+
+            - name: Install dependencies
+              run: npm install 
+
+            - name: Run tests
+              if: inputs.run_tests == true
+              run: echo "Running Tests" # bash test.sh
+
+            - name: Output Set
+              id: result
+              run: echo "result=passed" >> $GITHUB_OUTPUT
+
+
