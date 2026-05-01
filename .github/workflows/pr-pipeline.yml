@@ -1,0 +1,21 @@
+name: PR Pipeline
+
+on:
+    pull_request:
+        branches: [main]
+        types: [opened, synchronize]
+
+jobs:
+    test:
+        uses: ./.github/workflows/reusable-build-test.yml
+        with:
+            node_version: "18"
+            run_tests: true
+
+    pr-comment:
+        needs: test
+        runs-on: ubuntu-latest
+        steps:
+            - name: Print Summary
+              run: echo "PR checks passed for branch ${{ github.head_ref}}"
+    
