@@ -22,7 +22,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      image: ${{ steps.meta.outputs.image }} 
+      image: ${{ steps.set-output.outputs.image }} 
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -40,14 +41,19 @@ jobs:
           IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${{ inputs.tag }}"
           echo "image=$IMAGE"
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
+          echo "image=$IMAGE" >> $GITHUB_ENV
+
+      - name: Set final output
+        id: set-output
+        run: |
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
 
       - name: Debug inside reusable
-        run: echo "META OUTPUT = ${{ steps.meta.outputs.image }}"
-
+        run: echo "FINAL IMAGE = $IMAGE"
 
       - name: Build and Push
         uses: docker/build-push-action@v7
         with:
           push: true
           context: .
-          tags: ${{ steps.meta.outputs.image }}
+          tags: $IMAGE
