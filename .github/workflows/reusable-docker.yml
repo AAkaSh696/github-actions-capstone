@@ -38,6 +38,7 @@ jobs:
         run: |
           echo "username=${{ secrets.DOCKER_USERNAME }}"
           IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${{ inputs.tag }}"
+          echo "image=$IMAGE"
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
 
       - name: Debug inside reusable
