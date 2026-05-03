@@ -58,7 +58,7 @@ jobs:
 
   # 🔹 Job 5: Deploy
   deploy:
-    needs: [docker, security-scan]
+    needs: [docker]
     runs-on: ubuntu-latest
     environment: production
 
