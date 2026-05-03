@@ -4,13 +4,8 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: read
-  pull-requests: write
-
 jobs:
   test:
-    # Assuming this file exists in your repository
     uses: ./.github/workflows/reusable-build-test.yml
     with:
       node_version: "18"
@@ -20,7 +15,7 @@ jobs:
     uses: ./.github/workflows/reusable-docker.yml
     with:
       image_name: "day-48-node-app"
-      tag: latest
+      tag: "latest"
     secrets:
       docker_username: ${{ secrets.DOCKER_USERNAME }}
       docker_token: ${{ secrets.DOCKER_TOKEN }} 
@@ -30,20 +25,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Debug docker output
-        run: 'echo "Scanning image: ${{ needs.docker.outputs.image_url }}"'
+        # This should now print: Scanning image: username/day-48-node-app:latest
+        run: |
+          echo "OUTPUT CHECK: ${{ needs.docker.outputs.image_url }}"
         
-      - name: Scan Docker Image for Vulnerabilities
+      - name: Scan Docker Image
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ needs.docker.outputs.image_url }}
           format: 'table'
           exit-code: '1'
           severity: 'CRITICAL,HIGH'
-
-  deploy:
-    needs: [docker] # Changed to depend on scan passing
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: Deploy
-        run: echo "Deploying ${{ needs.docker.outputs.image_url }} to production"

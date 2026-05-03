@@ -17,13 +17,15 @@ on:
     outputs:
       image_url:
         description: "The full image name and tag"
-        value: ${{ jobs.build.outputs.image }}
+        # This maps the Job output to the Step output
+        value: ${{ jobs.build.outputs.image_tag }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Map the step output to the job output
     outputs:
-      image: ${{ steps.meta.outputs.image }} 
+      image_tag: ${{ steps.meta.outputs.image }} 
 
     steps:
       - name: Checkout Code
@@ -38,14 +40,15 @@ jobs:
       - name: Set image metadata
         id: meta
         run: |
-          # Construct the image path using the secrets passed into the workflow
+          # Use the secrets as defined in the 'secrets' block above (lowercase)
+          # We define a local variable and immediately write it to the output file
           FULL_IMAGE="${{ secrets.docker_username }}/${{ inputs.image_name }}:${{ inputs.tag }}"
           echo "image=$FULL_IMAGE" >> $GITHUB_OUTPUT
-          echo "Created image tag: $FULL_IMAGE"
 
       - name: Build and Push
         uses: docker/build-push-action@v7
         with:
           push: true
           context: .
+          # Use the output from the 'meta' step
           tags: ${{ steps.meta.outputs.image }}
