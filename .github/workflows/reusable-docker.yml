@@ -15,17 +15,17 @@ on:
       docker_token:
         required: true
     outputs:
+      # LAYER 3: The "Caller" sees this. It MUST point to the job output.
       image_url:
         description: "The full image name and tag"
-        # We point directly to the job-level output
-        value: ${{ jobs.build.outputs.image_tag }}
+        value: ${{ jobs.build.outputs.final_image_string }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Map the step output to the job output
+    # LAYER 2: The Job level. It MUST point to the step output.
     outputs:
-      image_tag: ${{ steps.meta.outputs.image }} 
+      final_image_string: ${{ steps.meta.outputs.step_output_var }} 
 
     steps:
       - name: Checkout Code
@@ -41,18 +41,19 @@ jobs:
         id: meta
         shell: bash
         run: |
-          # Create the string. Ensure no trailing spaces or hidden characters.
-          # Using the lowercase secret names defined in workflow_call.
+          # LAYER 1: The Step level.
+          # Create the string and push it to $GITHUB_OUTPUT
           IMAGE_PATH="${{ secrets.docker_username }}/${{ inputs.image_name }}:${{ inputs.tag }}"
-          echo "image=$IMAGE_PATH" >> $GITHUB_OUTPUT
           
-          # Debug: This will show up in the logs of the BUILD job
-          echo "Internal Variable Check: $IMAGE_PATH"
+          echo "step_output_var=$IMAGE_PATH" >> $GITHUB_OUTPUT
+          
+          # CRITICAL DEBUG: Check your GitHub logs for this line!
+          # If this prints "/day-48-node-app:latest", your secret is empty.
+          echo "DEBUG: The value being sent to output is: $IMAGE_PATH"
 
       - name: Build and Push
         uses: docker/build-push-action@v7
         with:
           push: true
           context: .
-          # Reference the output from the meta step
-          tags: ${{ steps.meta.outputs.image }}
+          tags: ${{ steps.meta.outputs.step_output_var }}
