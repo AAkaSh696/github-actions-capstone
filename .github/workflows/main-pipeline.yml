@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
 
+# Permissions are sometimes required for outputs to propagate in certain Org settings
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   test:
     uses: ./.github/workflows/reusable-build-test.yml
@@ -24,14 +29,18 @@ jobs:
     needs: [docker]
     runs-on: ubuntu-latest
     steps:
-      - name: Debug docker output
-        # This should now print: Scanning image: username/day-48-node-app:latest
+      - name: Verify Output Reception
         run: |
-          echo "OUTPUT CHECK: ${{ needs.docker.outputs.image_url }}"
+          echo "The received image URL is: ${{ needs.docker.outputs.image_url }}"
+          if [ -z "${{ needs.docker.outputs.image_url }}" ]; then
+            echo "ERROR: Image URL is empty"
+            exit 1
+          fi
         
       - name: Scan Docker Image
         uses: aquasecurity/trivy-action@master
         with:
+          # If image_url is still empty, this is where it fails.
           image-ref: ${{ needs.docker.outputs.image_url }}
           format: 'table'
           exit-code: '1'
