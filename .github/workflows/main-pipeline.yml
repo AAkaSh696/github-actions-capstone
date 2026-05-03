@@ -2,19 +2,21 @@ name: Main Pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
 
-# Permissions are sometimes required for outputs to propagate in certain Org settings
 permissions:
   contents: read
   packages: write
 
 jobs:
+
+  # 🔹 Job 1: Test
   test:
     uses: ./.github/workflows/reusable-build-test.yml
     with:
       node_version: "18"
 
+  # 🔹 Job 2: Docker Build
   docker:
     needs: test
     uses: ./.github/workflows/reusable-docker.yml
@@ -23,25 +25,43 @@ jobs:
       tag: "latest"
     secrets:
       docker_username: ${{ secrets.DOCKER_USERNAME }}
-      docker_token: ${{ secrets.DOCKER_TOKEN }} 
+      docker_token: ${{ secrets.DOCKER_TOKEN }}
 
-  security-scan:
-    needs: [docker]
+  # 🔹 Job 3: Debug Output (important for verification)
+  debug:
+    needs: docker
     runs-on: ubuntu-latest
     steps:
-      - name: Verify Output Reception
+      - name: Print Image Output
+        run: echo "IMAGE = ${{ needs.docker.outputs.image_url }}"
+
+  # 🔹 Job 4: Security Scan
+  security-scan:
+    needs: docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Output
         run: |
-          echo "The received image URL is: ${{ needs.docker.outputs.image_url }}"
+          echo "Image URL: ${{ needs.docker.outputs.image_url }}"
           if [ -z "${{ needs.docker.outputs.image_url }}" ]; then
             echo "ERROR: Image URL is empty"
             exit 1
           fi
-        
+
       - name: Scan Docker Image
         uses: aquasecurity/trivy-action@master
         with:
-          # If image_url is still empty, this is where it fails.
           image-ref: ${{ needs.docker.outputs.image_url }}
-          format: 'table'
-          exit-code: '1'
-          severity: 'CRITICAL,HIGH'
+          format: table
+          exit-code: 1
+          severity: CRITICAL,HIGH
+
+  # 🔹 Job 5: Deploy
+  deploy:
+    needs: [docker, security-scan]
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Deploy
+        run: 'echo "Deploying ${{ needs.docker.outputs.image_url }} to production"'

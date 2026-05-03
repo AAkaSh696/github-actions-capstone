@@ -15,23 +15,21 @@ on:
       docker_token:
         required: true
     outputs:
-      # LAYER 3: The "Caller" sees this. It MUST point to the job output.
       image_url:
-        description: "The full image name and tag"
-        value: ${{ jobs.build.outputs.final_image_string }}
+        value: ${{ jobs.build.outputs.image }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # LAYER 2: The Job level. It MUST point to the step output.
+
     outputs:
-      final_image_string: ${{ steps.meta.outputs.step_output_var }} 
+      image: ${{ steps.meta.outputs.image }}
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Login Docker
+      - name: Login to DockerHub
         uses: docker/login-action@v4
         with:
           username: ${{ secrets.docker_username }}
@@ -39,21 +37,14 @@ jobs:
 
       - name: Set image metadata
         id: meta
-        shell: bash
         run: |
-          # LAYER 1: The Step level.
-          # Create the string and push it to $GITHUB_OUTPUT
-          IMAGE_PATH="${{ secrets.docker_username }}/${{ inputs.image_name }}:${{ inputs.tag }}"
-          
-          echo "step_output_var=$IMAGE_PATH" >> $GITHUB_OUTPUT
-          
-          # CRITICAL DEBUG: Check your GitHub logs for this line!
-          # If this prints "/day-48-node-app:latest", your secret is empty.
-          echo "DEBUG: The value being sent to output is: $IMAGE_PATH"
+          IMAGE="${{ secrets.docker_username }}/${{ inputs.image_name }}:${{ inputs.tag }}"
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+          echo "DEBUG IMAGE = $IMAGE"
 
-      - name: Build and Push
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@v7
         with:
           push: true
           context: .
-          tags: ${{ steps.meta.outputs.step_output_var }}
+          tags: ${{ steps.meta.outputs.image }}
