@@ -16,13 +16,14 @@ on:
         required: true
     outputs:
       image_url:
+        description: "The full image name and tag"
         value: ${{ jobs.build.outputs.image }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      image: ${{ steps.set-output.outputs.image }} 
+      image: ${{ steps.meta.outputs.image }} 
 
     steps:
       - name: Checkout Code
@@ -31,25 +32,16 @@ jobs:
       - name: Login Docker
         uses: docker/login-action@v4
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+          username: ${{ secrets.docker_username }}
+          password: ${{ secrets.docker_token }}
 
       - name: Set image metadata
         id: meta
         run: |
-          echo "username=${{ secrets.DOCKER_USERNAME }}"
-          IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${{ inputs.tag }}"
-          echo "image=$IMAGE"
-          echo "image=$IMAGE" >> $GITHUB_OUTPUT
-          echo "image=$IMAGE" >> $GITHUB_ENV
-
-      - name: Set final output
-        id: set-output
-        run: |
-          echo "image=$IMAGE" >> $GITHUB_OUTPUT
-
-      - name: Debug inside reusable
-        run: echo "FINAL IMAGE = $IMAGE"
+          # Construct the image path using the secrets passed into the workflow
+          FULL_IMAGE="${{ secrets.docker_username }}/${{ inputs.image_name }}:${{ inputs.tag }}"
+          echo "image=$FULL_IMAGE" >> $GITHUB_OUTPUT
+          echo "Created image tag: $FULL_IMAGE"
 
       - name: Build and Push
         uses: docker/build-push-action@v7
