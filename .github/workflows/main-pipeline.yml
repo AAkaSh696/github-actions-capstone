@@ -22,7 +22,7 @@ jobs:
       tag: latest
     secrets:
       docker_username: ${{ secrets.DOCKER_USERNAME }}
-      docker_token: ${{ secrets.DOCKER_TOKEN }}
+      docker_token: ${{ secrets.DOCKER_TOKEN }} 
 
   security-scan:
     needs: [docker]
