@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   test:
     uses: ./.github/workflows/reusable-build-test.yml
@@ -16,10 +20,21 @@ jobs:
     with:
       image_name: "day-48-node-app"
       tag: latest
-
     secrets:
       docker_username: ${{ secrets.docker_username }}
       docker_token: ${{ secrets.docker_token }}
+
+  security-scan:
+    needs: [docker]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan Docker Image for Vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+         image-ref: '${{ needs.docker.outputs.image_url }}'
+         format: 'table'
+         exit-code: '1'
+         severity: 'CRITICAL,HIGH'
 
   deploy:
     needs: docker
