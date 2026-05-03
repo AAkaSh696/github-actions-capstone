@@ -37,7 +37,7 @@ jobs:
       - name: Set image metadata
         id: meta
         run: |
-          IMAGE="${{ secrets.docker_username }}/${{ inputs.image_name }}:${{ inputs.tag }}"
+          IMAGE="${{ vars.docker_username }}/${{ inputs.image_name }}:${{ inputs.tag }}"
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
 
       - name: Build and Push

@@ -37,7 +37,7 @@ jobs:
          severity: 'CRITICAL,HIGH'
 
   deploy:
-    needs: docker
+    needs: [docker, security-scan]
     runs-on: ubuntu-latest
     environment: production
     steps:
