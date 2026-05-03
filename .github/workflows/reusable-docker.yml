@@ -56,4 +56,4 @@ jobs:
         with:
           push: true
           context: .
-          tags: $IMAGE
+          tags: ${{ steps.meta.outputs.image }}
