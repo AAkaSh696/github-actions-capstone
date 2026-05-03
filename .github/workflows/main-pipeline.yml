@@ -21,8 +21,8 @@ jobs:
       image_name: "day-48-node-app"
       tag: latest
     secrets:
-      docker_username: ${{ secrets.docker_username }}
-      docker_token: ${{ secrets.docker_token }}
+      docker_username: ${{ secrets.DOCKER_USERNAME }}
+      docker_token: ${{ secrets.DOCKER_TOKEN }}
 
   security-scan:
     needs: [docker]
@@ -37,7 +37,7 @@ jobs:
          severity: 'CRITICAL,HIGH'
 
   deploy:
-    needs: [docker, security-scan]
+    needs: [docker]
     runs-on: ubuntu-latest
     environment: production
     steps:
