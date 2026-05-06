@@ -32,13 +32,16 @@ jobs:
       - name: Debug Image
         run: echo "$IMAGE"
 
+      - name: Checkout trivyignore
+        uses: actions/checkout@v4
+
       - name: Scan Docker Image
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{env.IMAGE}}
           format: table
           exit-code: 1
-          severity: HIGH
+          severity: 'HIGH'
           trivyignores: .trivyignore
 
   deploy:
