@@ -1,8 +1,10 @@
 name: Main Pipeline
 
 on:
-  push:
-    branches: [ main ]
+  #push:
+   # branches: [ main ]
+
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -45,7 +47,7 @@ jobs:
           severity: CRITICAL,HIGH
 
   deploy:
-    needs: [docker]
+    needs: [security-scan]
     runs-on: ubuntu-latest
     environment: production
     env:
