@@ -20,10 +20,10 @@ jobs:
     uses: ./.github/workflows/reusable-docker.yml
     with:
       image_name: "day-48-node-app"
-      tag: ${{ github.sha }}
+      tag: ${{github.sha}}
     secrets:
-      docker_username: ${{ secrets.docker_username }}
-      docker_token: ${{ secrets.docker_token }}
+      docker_username: ${{secrets.docker_username}}
+      docker_token: ${{secrets.docker_token}}
 
 
   security-scan:
@@ -33,7 +33,7 @@ jobs:
 
       - name: Set image reference
         run: |
-          IMAGE=" ${{ secrets.docker_username }}/day-48-node-app:${{github.sha}}"
+          IMAGE=" ${{secrets.docker_username}}/day-48-node-app:${{github.sha}}"
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
       - name: Debug Image
@@ -42,7 +42,7 @@ jobs:
       - name: Scan Docker Image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.IMAGE }}
+          image-ref: ${{env.IMAGE}}
           format: table
           exit-code: 1
           severity: CRITICAL,HIGH
@@ -55,7 +55,7 @@ jobs:
     steps:
       - name: Set image reference
         run: |
-          IMAGE=" ${{ secrets.docker_username }}/day-48-node-app:${{ github.sha }}"
+          IMAGE=" ${{secrets.docker_username}}/day-48-node-app:${{github.sha}}"
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
       - name: Deploy
