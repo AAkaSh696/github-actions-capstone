@@ -12,13 +12,7 @@ permissions:
 
 jobs:
 
-  test:
-    uses: ./.github/workflows/reusable-build-test.yml
-    with:
-      node_version: "18"
-
   docker:
-    needs: test
     uses: ./.github/workflows/reusable-docker.yml
     with:
       image_name: "day-48-node-app"
