@@ -31,12 +31,20 @@ jobs:
             - name: Install dependencies
               run: npm install 
 
-            - name: Run tests
-              if: inputs.run_tests == true
-              run: echo "Running Tests" # bash test.sh
+            - name: Check Dependencies for Vulnerabilities
+              uses: actions/dependency-review-action@v4
+              id: check 
+              with:
+                    fail-on-severity: critical
 
-            - name: Output Set
+            - name: Output Check
               id: result
-              run: echo "result=passed" >> $GITHUB_OUTPUT
+              run: |
+                if [ "${{ steps.check.outcome }}" = "success" ]; then
+                    echo "result=passed" >> $GITHUB_OUTPUT
+                else
+                    echo "result=failed" >> $GITHUB_OUTPUT
+                 fi
+
 
 
