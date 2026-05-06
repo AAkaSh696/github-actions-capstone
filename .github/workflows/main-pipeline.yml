@@ -29,15 +29,12 @@ jobs:
   security-scan:
     needs: docker
     runs-on: ubuntu-latest
+    env:
+        IMAGE: ${{ secrets.docker_username }}/day-48-node-app:${{ github.sha }}
     steps:
 
-      - name: Set image reference
-        run: |
-          IMAGE=" ${{secrets.docker_username}}/day-48-node-app:${{github.sha}}"
-          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
-
       - name: Debug Image
-        run: echo "Image=$IMAGE"
+        run: echo "$IMAGE"
 
       - name: Scan Docker Image
         uses: aquasecurity/trivy-action@master
@@ -51,12 +48,9 @@ jobs:
     needs: [docker]
     runs-on: ubuntu-latest
     environment: production
+    env:
+       IMAGE: " ${{secrets.docker_username}}/day-48-node-app:${{github.sha}}"
 
     steps:
-      - name: Set image reference
-        run: |
-          IMAGE=" ${{secrets.docker_username}}/day-48-node-app:${{github.sha}}"
-          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
-
       - name: Deploy
         run: 'echo "Deploying $IMAGE to production"'
