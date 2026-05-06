@@ -33,6 +33,7 @@ jobs:
 
             - name: Check Dependencies for Vulnerabilities
               uses: actions/dependency-review-action@v4
+              id: check 
               with:
                     fail-on-severity: critical
 
