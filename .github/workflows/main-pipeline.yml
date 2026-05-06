@@ -30,10 +30,19 @@ jobs:
     needs: docker
     runs-on: ubuntu-latest
     steps:
+
+      - name: Set image reference
+        run: |
+          IMAGE: " ${{ secrets.DOCKER_USERNAME }}/day-48-node-app:latest"
+          echo "IMAGE= $IMAGE" >> $GITHUB_ENV
+
+      - name: Debug Image
+        run: echo "Image=$IMAGE"
+
       - name: Scan Docker Image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ needs.docker.outputs.image-url }}
+          image-ref: ${{ env.IMAGE }}
           format: table
           exit-code: 1
           severity: CRITICAL,HIGH
@@ -45,4 +54,4 @@ jobs:
 
     steps:
       - name: Deploy
-        run: 'echo "Deploying ${{ needs.docker.outputs.image-url }} to production"'
+        run: 'echo "Deploying ${{ env.IMAGE }} to production"'
